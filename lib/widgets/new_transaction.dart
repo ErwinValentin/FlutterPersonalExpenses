@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class NewTransaction extends StatefulWidget {
   final Function addNewTransaction;
@@ -10,10 +13,9 @@ class NewTransaction extends StatefulWidget {
 }
 
 class _NewTransactionState extends State<NewTransaction> {
-  
-  final titleController = new TextEditingController();
-
-  final amountController = new TextEditingController();
+  final _titleController = new TextEditingController();
+  final _amountController = new TextEditingController();
+  DateTime _selectedDate;
 
   @override
   Widget build(BuildContext context) {
@@ -25,25 +27,43 @@ class _NewTransactionState extends State<NewTransaction> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
             TextField(
-              controller: titleController,
+              controller: _titleController,
               decoration: InputDecoration(
                 labelText: 'Title',
               ),
-              onSubmitted: (_) => submitTransaction(),
+              onSubmitted: (_) => _submitTransaction(),
             ),
             TextField(
-              controller: amountController  ,
+              controller: _amountController,
               decoration: InputDecoration(
                 labelText: 'Amount',
               ),
               keyboardType: TextInputType.number,
-              onSubmitted: (_) => submitTransaction(),
+              onSubmitted: (_) => _submitTransaction(),
             ),
-            FlatButton(
+            Row(
+              children: <Widget>[
+                Flexible(
+                  fit: FlexFit.tight,
+                  child: Text(
+                    _selectedDate == null
+                        ? 'No Date Selected'
+                        : DateFormat('yyyy/MM/dd').format(_selectedDate),
+                  ),
+                ),
+                FlatButton(
+                  child: Text('Select a Date'),
+                  onPressed: () {
+                    _presentDatePicker();
+                  },
+                ),
+              ],
+            ),
+            RaisedButton(
               child: Text('Add Transaction'),
-              textColor: Colors.purple,
-              onPressed: submitTransaction
-              ,
+              color: Theme.of(context).primaryColor,
+              textColor: Theme.of(context).textTheme.button.color,
+              onPressed: _submitTransaction,
             )
           ],
         ),
@@ -51,17 +71,37 @@ class _NewTransactionState extends State<NewTransaction> {
     );
   }
 
-  void submitTransaction() {
-    final enteredText = titleController.text;
-    final enterdAmount = double.parse(amountController.text);
-
-    if(enteredText.isEmpty || enterdAmount <= 0){
-      return;
+  void _presentDatePicker() {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2019),
+      lastDate: DateTime.now(),
+    ).then((pickedDate) {
+      if (pickedDate == null) {
+        return;
+      } else {
+        setState(() {
+          _selectedDate = pickedDate;
+        });
       }
+    });
+  }
+
+  void _submitTransaction() {
+    log('${_titleController.text} ${_amountController.text}');
+    final enteredText = _titleController.text;
+    final enteredAmount = double.parse(_amountController.text);
+
+    log('$enteredText, $enteredAmount $_selectedDate');
+    if (enteredText.isEmpty || enteredAmount <= 0 || _selectedDate == null) {
+      return;
+    }
 
     widget.addNewTransaction(
       enteredText,
-      enterdAmount
+      enteredAmount,
+      _selectedDate,
     );
 
     Navigator.of(context).pop();
