@@ -73,15 +73,18 @@ class TransactionList extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          IconButton(
-                            icon: Icon(Icons.delete),
-                            color: Theme.of(context).errorColor,
-                            onPressed: (()=> _deleteTransaction(transactions[index].id)),
-                          )
-                        ],
+                      Spacer(),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: <Widget>[
+                            IconButton(
+                              icon: Icon(Icons.delete),
+                              color: Theme.of(context).errorColor,
+                              onPressed: (()=> _deleteTransaction(transactions[index].id)),
+                            )
+                          ],
+                        ),
                       ),
                     ],
                   ),

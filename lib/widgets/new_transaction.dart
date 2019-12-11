@@ -28,6 +28,7 @@ class _NewTransactionState extends State<NewTransaction> {
           children: <Widget>[
             TextField(
               controller: _titleController,
+              autofocus: true,
               decoration: InputDecoration(
                 labelText: 'Title',
               ),
@@ -64,7 +65,12 @@ class _NewTransactionState extends State<NewTransaction> {
               color: Theme.of(context).primaryColor,
               textColor: Theme.of(context).textTheme.button.color,
               onPressed: _submitTransaction,
-            )
+            ),
+            Center( child:Container(
+              padding: EdgeInsets.all(10),
+              child: Text('Swipe down to dismiss!'),
+              
+            ))
           ],
         ),
       ),
