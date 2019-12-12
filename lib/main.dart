@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:personal_expenses/db/DatabaseHelper.dart';
+import 'package:sqflite/sqflite.dart' as prefix0;
+
 import './widgets/new_transaction.dart';
 import './widgets/transaction_list.dart';
 import './widgets/chart.dart';
@@ -8,6 +11,7 @@ void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
+
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Personal Expenses',
@@ -24,9 +28,7 @@ class MyApp extends StatelessWidget {
               ),
               button: TextStyle(
                 color: Colors.white,
-
               ),
-
             ),
         appBarTheme: AppBarTheme(
           textTheme: ThemeData.light().textTheme.copyWith(
@@ -37,7 +39,6 @@ class MyApp extends StatelessWidget {
                 ),
               ),
         ),
-        
       ),
       debugShowCheckedModeBanner: false,
     );
@@ -50,20 +51,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<Transaction> _userTransactions = [
-    /*Transaction(
-      id: 't1',
-      title: 'New Shoes',
-      amount: 420.69,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: 't2',
-      title: 'Groceries',
-      amount: 300.00,
-      date: DateTime.now(),
-    )*/
-  ];
+  DatabaseHelper databaseHelper = DatabaseHelper.db;
+  final List<Transaction> _userTransactions = [];
+  int count = 0;
 
   List<Transaction> get _recentTransactions {
     return _userTransactions.where((transaction) {
@@ -75,7 +65,8 @@ class _MyHomePageState extends State<MyHomePage> {
     }).toList();
   }
 
-  void _addNewTransaction(String txTitle, double txAmount, DateTime chosenDate) {
+  void _addNewTransaction(
+      String txTitle, double txAmount, DateTime chosenDate) {
     final newTx = new Transaction(
       title: txTitle,
       amount: txAmount,
@@ -83,9 +74,8 @@ class _MyHomePageState extends State<MyHomePage> {
       id: DateTime.now().toString(),
     );
 
-    setState(() {
-      _userTransactions.add(newTx);
-    });
+    databaseHelper.insertTransaction(newTx);
+    _updateTransactionList();
   }
 
   void _startAddNewTransaction(BuildContext ctx) {
@@ -93,7 +83,6 @@ class _MyHomePageState extends State<MyHomePage> {
       context: ctx,
       isScrollControlled: true,
       builder: (builderCtx) {
-        
         return GestureDetector(
           onTap: () {},
           child: NewTransaction(_addNewTransaction),
@@ -103,16 +92,26 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _deleteTransaction(String id){
-    setState(() {
-      _userTransactions.removeWhere((tx){
-        return tx.id == id;
+  void _deleteTransaction(String id) {
+    databaseHelper.deleteTransaction(id);
+    _updateTransactionList();
+  }
+
+  void _updateTransactionList(){
+    databaseHelper.getTransactions().then((list){
+      setState(() {
+        _userTransactions.clear();
+        _userTransactions.addAll(list);
+        this.count = _userTransactions.length;
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
+
+    _updateTransactionList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Personal Expenses'),
